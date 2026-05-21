@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Herreria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  background: #0d0a08;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, #2c1810 0%, #0d0a08 70%);
+  color: #2c1810;
+  padding: 20px 20px 50px;
+  min-height: 100vh;
+  position: relative;
+}
+
+.cactus {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cactus svg { display: block; }
+
+.cactus-left {
+  left: 10px;
+  top: -10px;
+}
+
+.cactus-right {
+  right: 15px;
+  top: 5px;
+}
+
+.cactus-small {
+  left: 160px;
+  top: -15px;
+  opacity: 0.7;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 30px auto;
+  background: #e8dcc8;
+  background-image:
+    linear-gradient(135deg, #f0e6d4 0%, #dccfba 50%, #e8dcc8 100%);
+  border: 3px solid #8b6914;
+  border-top-color: #c9a84c;
+  border-left-color: #b8962e;
+  box-shadow:
+    0 0 40px rgba(0,0,0,0.6),
+    inset 0 0 80px rgba(139,105,20,0.08);
+  padding: 0;
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px; right: 4px; bottom: 4px;
+  border: 1px solid rgba(139,105,20,0.3);
+  pointer-events: none;
+}
+
+.header {
+  background: linear-gradient(180deg, #3a2318 0%, #2c1810 100%);
+  padding: 28px 32px 22px;
+  border-bottom: 3px solid #8b6914;
+  position: relative;
+  text-align: center;
+}
+
+.header::after {
+  content: '✦ ✦ ✦';
+  display: block;
+  color: #c9a84c;
+  font-size: 12px;
+  letter-spacing: 12px;
+  margin-top: 8px;
+  opacity: 0.6;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 900;
+  color: #c9a84c;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.header .subtitle {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 14px;
+  color: #a08060;
+  letter-spacing: 3px;
+  margin-top: 4px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  padding: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+thead th {
+  background: linear-gradient(180deg, #4a2a1a 0%, #3a2318 100%);
+  color: #d4c5a9;
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  border-bottom: 2px solid #8b6914;
+  font-family: 'Playfair Display', serif;
+}
+
+thead th:first-child { text-align: left; padding-left: 16px; }
+
+tbody tr {
+  border-bottom: 1px solid #c4b69c;
+  transition: background 0.2s;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(201,168,76,0.05);
+}
+
+tbody tr:hover {
+  background: rgba(201,168,76,0.15);
+}
+
+tbody td {
+  padding: 5px 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: #2c1810;
+  padding-left: 16px;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+input[type="number"] {
+  width: 72px;
+  padding: 5px 8px;
+  border: 1px solid #b8962e;
+  border-radius: 0;
+  background: rgba(255,255,255,0.6);
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+  -moz-appearance: textfield;
+  color: #2c1810;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+input[type="number"]:focus {
+  border-color: #c9a84c;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
+
+input.price {
+  width: 80px;
+  font-weight: 600;
+}
+
+.total {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.row-total-min { color: #2c5f2d; }
+.row-total-max { color: #8b1a1a; }
+
+tfoot td {
+  padding: 14px 8px;
+  font-weight: 700;
+  font-size: 15px;
+  background: linear-gradient(180deg, #2c1810 0%, #1a0e08 100%);
+  color: #d4c5a9;
+  text-align: center;
+  border-top: 3px solid #8b6914;
+  font-family: 'Playfair Display', serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+tfoot td:first-child {
+  text-align: left;
+  padding-left: 16px;
+  color: #c9a84c;
+  font-weight: 900;
+}
+
+.grand-total-min { color: #6ba86b; }
+.grand-total-max { color: #e06060; }
+
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .header { padding: 18px 16px 14px; }
+  .header h1 { font-size: 20px; letter-spacing: 3px; }
+  table { font-size: 11px; }
+  input[type="number"] { width: 56px; padding: 4px 4px; font-size: 11px; }
+  input.price { width: 60px; }
+  thead th, tbody td { padding: 4px 3px; }
+  thead th { font-size: 10px; letter-spacing: 1px; }
+  tbody td:first-child { font-size: 11px; padding-left: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="cactus cactus-left">
+  <svg viewBox="0 0 60 140" width="60" height="140">
+    <rect x="22" y="10" width="16" height="120" rx="8" fill="#1a3a1a"/>
+    <rect x="2" y="50" width="22" height="10" rx="5" fill="#1a3a1a"/>
+    <rect x="2" y="20" width="10" height="40" rx="5" fill="#1a3a1a"/>
+    <rect x="36" y="40" width="22" height="10" rx="5" fill="#1a3a1a"/>
+    <rect x="48" y="15" width="10" height="35" rx="5" fill="#1a3a1a"/>
+    <ellipse cx="30" cy="135" rx="35" ry="8" fill="#0d0a08" opacity="0.4"/>
+  </svg>
+</div>
+<div class="cactus cactus-right">
+  <svg viewBox="0 0 50 110" width="50" height="110">
+    <rect x="18" y="8" width="14" height="92" rx="7" fill="rgba(26,58,26,0.6)"/>
+    <rect x="2" y="40" width="18" height="8" rx="4" fill="rgba(26,58,26,0.6)"/>
+    <rect x="2" y="18" width="8" height="30" rx="4" fill="rgba(26,58,26,0.6)"/>
+    <rect x="32" y="50" width="16" height="8" rx="4" fill="rgba(26,58,26,0.6)"/>
+    <rect x="40" y="30" width="8" height="28" rx="4" fill="rgba(26,58,26,0.6)"/>
+    <ellipse cx="25" cy="108" rx="28" ry="6" fill="#0d0a08" opacity="0.3"/>
+  </svg>
+</div>
+<div class="cactus cactus-small">
+  <svg viewBox="0 0 30 70" width="30" height="70">
+    <rect x="11" y="5" width="9" height="58" rx="4.5" fill="#1a3a1a"/>
+    <rect x="1" y="30" width="11" height="6" rx="3" fill="#1a3a1a"/>
+    <rect x="1" y="15" width="6" height="21" rx="3" fill="#1a3a1a"/>
+    <rect x="20" y="26" width="10" height="6" rx="3" fill="#1a3a1a"/>
+    <rect x="24" y="16" width="6" height="16" rx="3" fill="#1a3a1a"/>
+    <ellipse cx="15" cy="68" rx="16" ry="4" fill="#0d0a08" opacity="0.3"/>
+  </svg>
+</div>
+<div class="container">
+  <div class="header">
+    <h1>Kuang Ironworks</h1>
+    <div class="subtitle">✦ Precios en Dólares Americanos ✦</div>
+  </div>
+  <div class="table-wrap">
+    <table id="calc-table">
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Precio Mín</th>
+          <th>Cantidad</th>
+          <th>Total Mín</th>
+          <th>Precio Máx</th>
+          <th>Cantidad</th>
+          <th>Total Máx</th>
+        </tr>
+      </thead>
+      <tbody id="calc-body"></tbody>
+      <tfoot>
+        <tr>
+          <td>TOTAL GENERAL</td>
+          <td></td>
+          <td></td>
+          <td class="grand-total-min" id="grand-total-min">0.00</td>
+          <td></td>
+          <td></td>
+          <td class="grand-total-max" id="grand-total-max">0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+<script>
+const materials = [
+  { name: "BARRA DE HIERRO", min: 1.92, max: 2.40 },
+  { name: "TORNILLO", min: 0.19, max: 0.24 },
+  { name: "PIEZA DE ARMA", min: 2.04, max: 2.55 },
+  { name: "PIEZA DE ARMA ESPECIAL", min: 19.30, max: 24.12 },
+  { name: "CAÑON PISTOLA", min: 2.04, max: 2.55 },
+  { name: "CULATA PISTOLA", min: 2.40, max: 3.00 },
+  { name: "CAÑON REVOLVER", min: 2.04, max: 2.55 },
+  { name: "CULATA REVOLVER", min: 2.40, max: 3.00 },
+  { name: "CAÑON DE REPETIDORA", min: 3.96, max: 4.95 },
+  { name: "CULATA DE REPETIDORA", min: 4.32, max: 5.40 },
+  { name: "CAÑON DE RIFLE", min: 6.24, max: 7.80 },
+  { name: "CULATA DE RIFLE", min: 6.24, max: 7.80 },
+  { name: "CAÑON ESCOPETA", min: 5.88, max: 7.35 },
+  { name: "CULATA ESCOPETA", min: 6.24, max: 7.80 },
+  { name: "CLAVO", min: 0.13, max: 0.17 },
+  { name: "KIT REPARACION ARMA", min: 250, max: 300 },
+  { name: "HOJALATA", min: 0.34, max: 0.43 },
+  { name: "MENA DE ORO", min: 5.40, max: 6.75 },
+  { name: "HACHA", min: 2.76, max: 3.45 },
+  { name: "PALA", min: 2.76, max: 3.45 },
+  { name: "PICO", min: 2.76, max: 3.45 },
+  { name: "MARTILLO", min: 2.40, max: 3.45 },
+  { name: "LINTERNA 1", min: 2.40, max: 3.00 },
+  { name: "LINTERNA 2", min: 2.40, max: 3.00 },
+  { name: "BATEA", min: 2.04, max: 2.55 },
+  { name: "CUBO VACIO", min: 1.44, max: 1.80 },
+  { name: "FUNDIDORA", min: 10.06, max: 12.57 },
+  { name: "ALAMBIQUE", min: 100, max: 130 }
+];
+
+function render() {
+  const tbody = document.getElementById('calc-body');
+  tbody.innerHTML = '';
+  materials.forEach((mat, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${mat.name}</td>
+      <td><input type="number" class="price" step="0.01" value="${mat.min}" data-idx="${i}" data-field="min" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
+      <td><input type="number" step="1" min="0" value="0" data-idx="${i}" data-field="qty-min"></td>
+      <td class="total row-total-min" id="total-min-${i}">0.00</td>
+      <td><input type="number" class="price" step="0.01" value="${mat.max}" data-idx="${i}" data-field="max" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
+      <td><input type="number" step="1" min="0" value="0" data-idx="${i}" data-field="qty-max"></td>
+      <td class="total row-total-max" id="total-max-${i}">0.00</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('input', recalc);
+    input.addEventListener('blur', clampPrice);
+  });
+  recalc();
+}
+
+function clampPrice(e) {
+  const el = e.target;
+  if (!el.dataset.field || el.dataset.field === 'qty-min' || el.dataset.field === 'qty-max') return;
+  const idx = parseInt(el.dataset.idx);
+  const origMin = parseFloat(el.dataset.origMin);
+  const origMax = parseFloat(el.dataset.origMax);
+  let val = parseFloat(el.value);
+  if (isNaN(val)) val = origMin;
+  val = Math.max(origMin, Math.min(origMax, val));
+  const otherField = el.dataset.field === 'min' ? 'max' : 'min';
+  const otherEl = document.querySelector(`input[data-idx="${idx}"][data-field="${otherField}"]`);
+  const otherVal = parseFloat(otherEl.value);
+  if (el.dataset.field === 'min' && val > otherVal) {
+    val = otherVal;
+  } else if (el.dataset.field === 'max' && val < otherVal) {
+    val = otherVal;
+  }
+  el.value = val.toFixed(2);
+  recalc();
+}
+
+function recalc() {
+  let grandMin = 0, grandMax = 0;
+  materials.forEach((mat, i) => {
+    const priceMin = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="min"]`).value) || 0;
+    const qtyMin = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="qty-min"]`).value) || 0;
+    const priceMax = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="max"]`).value) || 0;
+    const qtyMax = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="qty-max"]`).value) || 0;
+    const totalMin = priceMin * qtyMin;
+    const totalMax = priceMax * qtyMax;
+    document.getElementById(`total-min-${i}`).textContent = totalMin.toFixed(2);
+    document.getElementById(`total-max-${i}`).textContent = totalMax.toFixed(2);
+    grandMin += totalMin;
+    grandMax += totalMax;
+  });
+  document.getElementById('grand-total-min').textContent = grandMin.toFixed(2);
+  document.getElementById('grand-total-max').textContent = grandMax.toFixed(2);
+}
+
+render();
+</script>
+</body>
+</html>
