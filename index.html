@@ -152,6 +152,52 @@ body {
   box-shadow: 0 0 0 2px rgba(201,168,76,0.2);
 }
 
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #8b6914;
+  background: linear-gradient(180deg, #2c1810 0%, #1a0e08 100%);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #8a7a60;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: #d4c5a9;
+  background: rgba(201,168,76,0.08);
+}
+
+.tab-btn.active {
+  color: #c9a84c;
+  background: rgba(201,168,76,0.12);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #c9a84c;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 .table-wrap {
   overflow-x: auto;
   padding: 4px;
@@ -326,35 +372,70 @@ tfoot td:first-child {
       </div>
     </div>
   </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="herramientas">🔧 Herreria</button>
+    <button class="tab-btn" data-tab="civiles">🏠 Compra a Civiles</button>
+  </div>
   <div class="search-container">
     <input type="text" class="search-input" id="search" placeholder="🔍 Buscar producto...">
   </div>
-  <div class="table-wrap">
-    <table id="calc-table">
-      <thead>
-        <tr>
-          <th>Material</th>
-          <th>Precio Mín</th>
-          <th>Cantidad</th>
-          <th>Total Mín</th>
-          <th>Precio Máx</th>
-          <th>Cantidad</th>
-          <th>Total Máx</th>
-        </tr>
-      </thead>
-      <tbody id="calc-body"></tbody>
-      <tfoot>
-        <tr>
-          <td>TOTAL GENERAL</td>
-          <td></td>
-          <td></td>
-          <td class="grand-total-min" id="grand-total-min">0.00</td>
-          <td></td>
-          <td></td>
-          <td class="grand-total-max" id="grand-total-max">0.00</td>
-        </tr>
-      </tfoot>
-    </table>
+  <div class="tab-panel active" id="panel-herramientas">
+    <div class="table-wrap">
+      <table id="calc-table-h">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Precio Mín</th>
+            <th>Cantidad</th>
+            <th>Total Mín</th>
+            <th>Precio Máx</th>
+            <th>Cantidad</th>
+            <th>Total Máx</th>
+          </tr>
+        </thead>
+        <tbody id="calc-body-h"></tbody>
+        <tfoot>
+          <tr>
+            <td>TOTAL GENERAL</td>
+            <td></td>
+            <td></td>
+            <td class="grand-total-min" id="grand-total-min-h">0.00</td>
+            <td></td>
+            <td></td>
+            <td class="grand-total-max" id="grand-total-max-h">0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-civiles">
+    <div class="table-wrap">
+      <table id="calc-table-c">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Precio Mín</th>
+            <th>Cantidad</th>
+            <th>Total Mín</th>
+            <th>Precio Máx</th>
+            <th>Cantidad</th>
+            <th>Total Máx</th>
+          </tr>
+        </thead>
+        <tbody id="calc-body-c"></tbody>
+        <tfoot>
+          <tr>
+            <td>TOTAL GENERAL</td>
+            <td></td>
+            <td></td>
+            <td class="grand-total-min" id="grand-total-min-c">0.00</td>
+            <td></td>
+            <td></td>
+            <td class="grand-total-max" id="grand-total-max-c">0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 </div>
 <script>
@@ -394,28 +475,38 @@ const materials = [
   { name: "TORNILLO", min: 0.19, max: 0.24 }
 ];
 
-function render() {
-  const tbody = document.getElementById('calc-body');
+const civilesMaterials = [
+  { name: "SAL", min: 0.07, max: 0.10 },
+  { name: "MENA DE ORO", min: 4.70, max: 5.00 },
+  { name: "MENA DE HIERRO", min: 0.70, max: 0.80 },
+  { name: "GRASA ANIMAL", min: 0.15, max: 0.20 },
+  { name: "CARBON", min: 0.18, max: 0.20 },
+  { name: "PIEDRA", min: 0.08, max: 0.10 },
+  { name: "AZUFRE", min: 0.18, max: 0.20 },
+  { name: "PEPITA DE ORO", min: 0.25, max: 0.30 }
+];
+
+function buildTable(tbodyId, grandMinId, grandMaxId, materialList, prefix) {
+  const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = '';
-  materials.forEach((mat, i) => {
+  materialList.forEach((mat, i) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${mat.name}</td>
-      <td><input type="number" class="price" step="0.01" value="${mat.min}" data-idx="${i}" data-field="min" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
-      <td><input type="number" step="1" min="0" value="0" data-idx="${i}" data-field="qty-min"></td>
-      <td class="total row-total-min" id="total-min-${i}">0.00</td>
-      <td><input type="number" class="price" step="0.01" value="${mat.max}" data-idx="${i}" data-field="max" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
-      <td><input type="number" step="1" min="0" value="0" data-idx="${i}" data-field="qty-max"></td>
-      <td class="total row-total-max" id="total-max-${i}">0.00</td>
+      <td><input type="number" class="price" step="0.01" value="${mat.min}" data-tab="${prefix}" data-idx="${i}" data-field="min" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
+      <td><input type="number" step="1" min="0" value="0" data-tab="${prefix}" data-idx="${i}" data-field="qty-min"></td>
+      <td class="total row-total-min" id="${prefix}-total-min-${i}">0.00</td>
+      <td><input type="number" class="price" step="0.01" value="${mat.max}" data-tab="${prefix}" data-idx="${i}" data-field="max" data-orig-min="${mat.min}" data-orig-max="${mat.max}" min="${mat.min}" max="${mat.max}"></td>
+      <td><input type="number" step="1" min="0" value="0" data-tab="${prefix}" data-idx="${i}" data-field="qty-max"></td>
+      <td class="total row-total-max" id="${prefix}-total-max-${i}">0.00</td>
     `;
     tbody.appendChild(tr);
   });
-
-  document.querySelectorAll('input[type="number"]').forEach(input => {
-    input.addEventListener('input', recalc);
+  document.querySelectorAll(`[data-tab="${prefix}"]`).forEach(input => {
+    input.addEventListener('input', () => recalc(prefix, materialList));
     input.addEventListener('blur', clampPrice);
   });
-  recalc();
+  recalc(prefix, materialList);
 }
 
 function clampPrice(e) {
@@ -428,7 +519,8 @@ function clampPrice(e) {
   if (isNaN(val)) val = origMin;
   val = Math.max(origMin, Math.min(origMax, val));
   const otherField = el.dataset.field === 'min' ? 'max' : 'min';
-  const otherEl = document.querySelector(`input[data-idx="${idx}"][data-field="${otherField}"]`);
+  const tab = el.dataset.tab;
+  const otherEl = document.querySelector(`input[data-tab="${tab}"][data-idx="${idx}"][data-field="${otherField}"]`);
   const otherVal = parseFloat(otherEl.value);
   if (el.dataset.field === 'min' && val > otherVal) {
     val = otherVal;
@@ -436,32 +528,48 @@ function clampPrice(e) {
     val = otherVal;
   }
   el.value = val.toFixed(2);
-  recalc();
+  const matList = tab === 'h' ? materials : civilesMaterials;
+  recalc(tab, matList);
 }
 
-function recalc() {
+function recalc(tab, matList) {
   let grandMin = 0, grandMax = 0;
-  materials.forEach((mat, i) => {
-    const priceMin = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="min"]`).value) || 0;
-    const qtyMin = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="qty-min"]`).value) || 0;
-    const priceMax = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="max"]`).value) || 0;
-    const qtyMax = parseFloat(document.querySelector(`input[data-idx="${i}"][data-field="qty-max"]`).value) || 0;
+  matList.forEach((mat, i) => {
+    const priceMin = parseFloat(document.querySelector(`input[data-tab="${tab}"][data-idx="${i}"][data-field="min"]`).value) || 0;
+    const qtyMin = parseFloat(document.querySelector(`input[data-tab="${tab}"][data-idx="${i}"][data-field="qty-min"]`).value) || 0;
+    const priceMax = parseFloat(document.querySelector(`input[data-tab="${tab}"][data-idx="${i}"][data-field="max"]`).value) || 0;
+    const qtyMax = parseFloat(document.querySelector(`input[data-tab="${tab}"][data-idx="${i}"][data-field="qty-max"]`).value) || 0;
     const totalMin = priceMin * qtyMin;
     const totalMax = priceMax * qtyMax;
-    document.getElementById(`total-min-${i}`).textContent = totalMin.toFixed(2);
-    document.getElementById(`total-max-${i}`).textContent = totalMax.toFixed(2);
+    document.getElementById(`${tab}-total-min-${i}`).textContent = totalMin.toFixed(2);
+    document.getElementById(`${tab}-total-max-${i}`).textContent = totalMax.toFixed(2);
     grandMin += totalMin;
     grandMax += totalMax;
   });
-  document.getElementById('grand-total-min').textContent = grandMin.toFixed(2);
-  document.getElementById('grand-total-max').textContent = grandMax.toFixed(2);
+  document.getElementById(`grand-total-min-${tab}`).textContent = grandMin.toFixed(2);
+  document.getElementById(`grand-total-max-${tab}`).textContent = grandMax.toFixed(2);
 }
 
-render();
+buildTable('calc-body-h', 'grand-total-min-h', 'grand-total-max-h', materials, 'h');
+buildTable('calc-body-c', 'grand-total-min-c', 'grand-total-max-c', civilesMaterials, 'c');
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById(`panel-${this.dataset.tab}`).classList.add('active');
+    document.getElementById('search').value = '';
+    const tbodyId = this.dataset.tab === 'herramientas' ? 'calc-body-h' : 'calc-body-c';
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(r => r.style.display = '');
+  });
+});
 
 document.getElementById('search').addEventListener('input', function () {
   const q = this.value.toLowerCase().trim();
-  const rows = document.querySelectorAll('#calc-body tr');
+  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  const tbodyId = activeTab === 'herramientas' ? 'calc-body-h' : 'calc-body-c';
+  const rows = document.querySelectorAll(`#${tbodyId} tr`);
   rows.forEach(row => {
     const name = row.cells[0].textContent.toLowerCase();
     row.style.display = !q || name.includes(q) ? '' : 'none';
